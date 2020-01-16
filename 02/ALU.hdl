@@ -42,5 +42,26 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+    Mux16(a[0..15]=x[0..15], b[0..15]=false, sel=zx, out=zeroORx);
+    Mux16(a[0..15]=y[0..15], b[0..15]=false, sel=zy, out=zeroORy);
+    Not16(in[0..15]=zeroORx, out=NOTx);
+    Not16(in[0..15]=zeroORy, out=NOTy);
+    Mux16(a[0..15]=zeroORx, b[0..15]=NOTx, sel=nx, out=NOTxORx);
+    Mux16(a[0..15]=zeroORy, b[0..15]=NOTy, sel=ny, out=NOTyORy);
+    And16(a[0..15]=NOTxORx, b[0..15]=NOTyORy, out=xANDy);
+    Add16(a[0..15]=NOTxORx, b[0..15]=NOTyORy, out=xADDy);
+    Mux16(a[0..15]=xANDy, b[0..15]=xADDy, sel=f, out=andORadd);
+    Not16(in[0..15]=andORadd, out=NOTresult);
+    Mux16(a[0..15]=andORadd, b[0..15]=NOTresult, sel=no, out[15]=ng, 
+    out[0]=Result0, out[1]=Result1, out[2]=Result2, out[3]=Result3, 
+    out[4]=Result4, out[5]=Result5, out[6]=Result6, out[7]=Result7, 
+    out[8]=Result8, out[9]=Result9, out[10]=Result10, out[11]=Result11, 
+    out[12]=Result12, out[13]=Result13, out[14]=Result14, out[15]=Result15, 
+    out[0..15]=out);
+    Or8Way(in[0]=Result0,  in[1]=Result1, in[2]=Result2, in[3]=Result3,
+    in[4]=Result4, in[5]=Result5, in[6]=Result6, in[7]=Result7, out=ORout1);
+    Or8Way(in[0]=Result8, in[1]=Result9, in[2]=Result10, in[3]=Result11,
+    in[4]=Result12, in[5]=Result13,  in[6]=Result14, in[7]=Result15, out=ORout2);
+    Or(a=ORout1, b=ORout2, out=ORout);
+    Not(in=ORout, out=zr);
 }
