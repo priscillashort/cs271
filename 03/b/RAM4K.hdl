@@ -15,5 +15,20 @@ CHIP RAM4K {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    DMux8Way(in=load, sel[0..2]=address[9..11],
+    a=loadRAM0, b=loadRAM1, c=loadRAM2, d=loadRAM3,
+    e=loadRAM4, f=loadRAM5, g=loadRAM6, h=loadRAM7);
+    RAM512(in[0..15]=in[0..15], load=loadRAM0, address[0..8]=address[0..8], out[0..15]=RAM0out);
+    RAM512(in[0..15]=in[0..15], load=loadRAM1, address[0..8]=address[0..8], out[0..15]=RAM1out);
+    RAM512(in[0..15]=in[0..15], load=loadRAM2, address[0..8]=address[0..8], out[0..15]=RAM2out);
+    RAM512(in[0..15]=in[0..15], load=loadRAM3, address[0..8]=address[0..8], out[0..15]=RAM3out);
+    RAM512(in[0..15]=in[0..15], load=loadRAM4, address[0..8]=address[0..8], out[0..15]=RAM4out);
+    RAM512(in[0..15]=in[0..15], load=loadRAM5, address[0..8]=address[0..8], out[0..15]=RAM5out);
+    RAM512(in[0..15]=in[0..15], load=loadRAM6, address[0..8]=address[0..8], out[0..15]=RAM6out);
+    RAM512(in[0..15]=in[0..15], load=loadRAM7, address[0..8]=address[0..8], out[0..15]=RAM7out);
+    Mux8Way16(sel[0..2]=address[9..11],
+    a[0..15]=RAM0out, b[0..15]=RAM1out,
+    c[0..15]=RAM2out, d[0..15]=RAM3out,
+    e[0..15]=RAM4out, f[0..15]=RAM5out,
+    g[0..15]=RAM6out, h[0..15]=RAM7out, out[0..15]=out[0..15]);
 }
