@@ -38,5 +38,6 @@ M=0
 D=M
 @R2
 M=D
-@END
+(PROGEND)
+@PROGEND
 0;JMP
