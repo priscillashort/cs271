@@ -73,7 +73,7 @@ M=D
 (UNFILLLOOP)
     @screenaddress
     A=M
-    M=1
+    M=0
     @screenaddress
     D=M
     @1
