@@ -39,5 +39,86 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+
+
+
+
+    Mux16(a=outMtemp, b=instruction, sel=instruction[15], out=outmux);
+    Not(in=instruction[15], out=addressInstruction);
+    ARegister(in=outmux, load=addressInstruction, out=A, out[0..14]=addressM[0..14]);
+    Mux16(a=A, b=inM, sel=instruction[12], out=AorM);
+    Not(in=instruction[12], out=writeM);
+    DRegister(in=outMtemp, load=addressInstruction, out=D);
+    PC(in=A, reset=reset, load=shouldJump, inc=increment, out[0..14]=pc[0..14]);
+
+    ALU(x=D, y=AorM, 
+    zx=instruction[6],
+    nx=instruction[7],
+    zy=instruction[8],
+    ny=instruction[9],
+    f=instruction[10],
+    no=instruction[11],
+    out=outM, out=outMtemp,
+    zr=zrout,
+    ng=ngout);
+
+    
+    //vvvv Decode jump instructions vvvvv
+
+    //negation of the jump instructions
+    Not(in=instruction[0], out=notj3);
+    Not(in=instruction[1], out=notj2);
+    Not(in=instruction[2], out=notj1);
+    
+    //negation of zr and ng
+    Not(in=zrout, out=notzr);
+    Not(in=ngout, out=notng);
+
+    //jump comparisons
+    And(a=notzr, b=notng, out=notzrANDnotng);
+    Or(a=zrout, b=notng, out=zrORnotng);
+    And(a=notzr, b=ngout, out=notzrANDng);
+    Or(a=zrout, b=ngout, out=zrORng);
+
+    //decode jump instructions
+    And(a=notj1, b=notj2, out=notj1ANDnotj2);
+    And(a=notj1ANDnotj2, b=instruction[0], out=JGT);
+    And(a=notj1, b=instruction[1], out=notj1ANDj2);
+    And(a=notj1ANDj2, b=notj3, out=JEQ);
+    And(a=notj1ANDj2, b=instruction[0], out=JGE);
+    And(a=instruction[2], b=notj2, out=j1ANDnotj2);
+    And(a=j1ANDnotj2, b=notj3, out=JLT);
+    And(a=j1ANDnotj2, b=instruction[0], out=JNE);
+    And(a=instruction[2], b=instruction[1], out=j1ANDj2);
+    And(a=j1ANDj2, b=notj3, out=JLE);
+    And(a=j1ANDj2, b=instruction[0], out=JMP);
+
+    //combine jump instruction with jump comparison
+    And(a=JGT, b=notzrANDnotng, out=JGTtrue);
+    And(a=JEQ, b=zrout, out=JEQtrue);
+    And(a=JGE, b=zrORnotng, out=JGEtrue);
+    And(a=JLT, b=notzrANDng, out=JLTtrue);
+    And(a=JNE, b=notzr, out=JNEtrue);
+    And(a=JLE, b=zrORng, out=JLEtrue);
+
+    //Test if we should be jumping
+    Or8Way(in[0]=false, in[1]=JGTtrue, in[2]=JEQtrue, in[3]=JGEtrue, 
+    in[4]=JLTtrue, in[5]=JNEtrue, in[6]=JLEtrue, in[7]=JMP, 
+    out=shouldJump);
+    Not(in=shouldJump, out=increment);
+
+    //^^^^^ Decode jump instructions ^^^^^
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
