@@ -5,34 +5,35 @@ require_relative 'variable_manager'
 
 class Parser
 
-	attr_reader :line, :variable_manager
+	attr_reader :hack_file_name, :line
 
-  def initialize(line, variable_manager)
-		@line = line
-		@variable_manager = variable_manager
+  def initialize(hack_file_name)
+		@hack_file_name = hack_file_name
 	end
 	
-	def parse
+	def parse(line, variable_manager)
+		@line = line
 		strip_whitespace
 		strip_comments
+		aparser = AParser.new
+		cparser = CParser.new
+		labelparser = LabelParser.new
 
 		if a_instruction?
-			aparser = AParser.new(@line, @variable_manager)
-			@variable_manager = aparser.parse
-			@variable_manager.program_line_counter += 1
+			parsed_line = aparser.parse(@line, variable_manager)
+			File.write(@hack_file_name, parsed_line << "\n", mode: "a")
+			variable_manager.program_line_counter += 1
 		elsif c_instruction?
-			cparser = CParser.new(@line)
-			cparser.parse
-			@variable_manager.program_line_counter += 1
+			parsed_line = cparser.parse(@line)
+			File.write(@hack_file_name, parsed_line << "\n", mode: "a")
+			variable_manager.program_line_counter += 1
 		elsif label?
-			labelparser = LabelParser.new(@line, @variable_manager)
-			@variable_manager = labelparser.parse
+			labelparser.parse(@line, variable_manager)
 		elsif blank_line?
 		else
 			raise "NOT VALID CODE"
 		end
 
-		@variable_manager
 	end
 
 	def strip_whitespace

@@ -15,16 +15,11 @@ class Assembler
 
 	def translate_program
 		create_hack_file
+		parser = Parser.new(@hack_file_name)
+
 		File.open(asm_file_name).each do |line|
-
-			puts line
-
-			parser = Parser.new(line, @variable_manager)
-			@variable_manager = parser.parse
-
+			parser.parse(line, variable_manager)
 		end
-
-		puts @variable_manager.variables
 
 	end
 
@@ -37,9 +32,11 @@ class Assembler
 	end
 
 	def create_hack_file
-		#if File.exists?(@hack_file_name)
-			FileUtils.touch(@hack_file_name)
-		#end
+		if File.exists?(@hack_file_name)
+			FileUtils.rm(@hack_file_name)
+		end
+
+		FileUtils.touch(@hack_file_name)
 	end
 
 end

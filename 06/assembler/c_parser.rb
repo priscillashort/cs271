@@ -1,11 +1,8 @@
-require_relative 'variable_manager'
-
 class CParser
 
-	attr_accessor :line, :jump_bits, :ac_bits, :dest_bits
+	attr_reader :line, :jump_bits, :ac_bits, :dest_bits
 
-  def initialize(line)
-		@line = line
+	def initialize
 		@dest_bits = {
 			"" => "000",
 			"M" => "001",
@@ -59,7 +56,8 @@ class CParser
 		}
 	end
 	
-	def parse
+	def parse(line)
+		@line = line
 		parse_c_instruction
 	end
 
@@ -91,7 +89,7 @@ class CParser
 			raise "Invalid C instruction"
 		end
 
-		puts "111" << result
+		"111" << result
 	end
 
 end

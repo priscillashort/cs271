@@ -2,30 +2,28 @@ require_relative 'variable_manager'
 
 class AParser
 
-	attr_accessor :line, :variable_manager
+	attr_accessor :line
 
-  def initialize(line, variable_manager)
+	def parse(line, variable_manager)
 		@line = line
-		@variable_manager = variable_manager
-	end
-	
-	def parse
-		parse_a_instruction
-		@variable_manager
+		parse_a_instruction(variable_manager)
 	end
 
-	def parse_a_instruction
+	def parse_a_instruction(variable_manager)
 		strip_commercial_at_and_new_line
+		hack_line = ""
 
 		if register_address?
-			puts "0" + convert_to_binary(self.line)
+			hack_line = "0" + convert_to_binary(self.line)
 		else
-			if !@variable_manager.variables.key?(self.line.to_sym)
-				@variable_manager.variables[self.line.to_sym] = @variable_manager.variable_counter
-				@variable_manager.variable_counter += 1
+			if !variable_manager.variables.key?(self.line.to_sym)
+				variable_manager.variables[self.line.to_sym] = variable_manager.variable_counter
+				variable_manager.variable_counter += 1
 			end
-			puts "0" + convert_to_binary(@variable_manager.variables[self.line.to_sym])
+			hack_line = "0" + convert_to_binary(variable_manager.variables[self.line.to_sym])
 		end
+
+		hack_line
 	end
 
 	def strip_commercial_at_and_new_line
