@@ -2,11 +2,10 @@ require_relative 'variable_manager'
 
 class CParser
 
-	attr_accessor :line, :variable_manager, :jump_bits, :ac_bits, :dest_bits
+	attr_accessor :line, :jump_bits, :ac_bits, :dest_bits
 
-  def initialize(line, variable_manager)
+  def initialize(line)
 		@line = line
-		@variable_manager = variable_manager
 		@dest_bits = {
 			"" => "000",
 			"M" => "001",
@@ -62,7 +61,6 @@ class CParser
 	
 	def parse
 		parse_c_instruction
-		@variable_manager
 	end
 
 	def parse_c_instruction
@@ -84,9 +82,14 @@ class CParser
 		after_semi = split_on_semi.size == 1 ? "" : split_on_semi[1]
 
 		result = ""
-		result << ac_bits[before_semi]
-		result << dest_bits[before_eq]
-		result << jump_bits[after_semi]
+
+		begin
+			result << ac_bits[before_semi]
+			result << dest_bits[before_eq]
+			result << jump_bits[after_semi]
+		rescue
+			raise "Invalid C instruction"
+		end
 
 		puts "111" << result
 	end

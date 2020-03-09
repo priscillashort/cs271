@@ -21,8 +21,8 @@ class Parser
 			@variable_manager = aparser.parse
 			@variable_manager.program_line_counter += 1
 		elsif c_instruction?
-			cparser = CParser.new(@line, @variable_manager)
-			@variable_manager = cparser.parse
+			cparser = CParser.new(@line)
+			cparser.parse
 			@variable_manager.program_line_counter += 1
 		elsif label?
 			labelparser = LabelParser.new(@line, @variable_manager)
@@ -48,7 +48,7 @@ class Parser
 	end
 	
 	def label?
-		self.line[/^\(/] == "("
+		self.line[/^\(/] == "(" && self.line[/\)$/] == ")"
 	end
 
 	def a_instruction?
@@ -56,8 +56,7 @@ class Parser
 	end
 
 	def c_instruction?
-		#Refine
-		self.line[/^M/] == "M" || self.line[/^D/] == "D" || self.line[/^0/] == "0"
+		self.line[/^M/] == "M" || self.line[/^D/] == "D" || self.line[/^A/] == "A" || self.line[/^0/] == "0"
 	end
 
 end

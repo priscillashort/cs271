@@ -20,6 +20,13 @@ class VariableManager
 			:R13 => 13,
 			:R14 => 14,
 			:R15 => 15,
+			:SP => 0,
+			:LCL => 1,
+			:ARG => 2,
+			:THIS => 3,
+			:THAT => 4,
+			:SCREEN => 16384,
+			:KBD => 24576
 		}
 		@variable_counter = 16
 		@program_line_counter = 0
