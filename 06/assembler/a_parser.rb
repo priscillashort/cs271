@@ -3,34 +3,40 @@ require_relative 'variable_manager'
 class AParser
 
 	attr_accessor :line
+	attr_reader :rom_variable, :label_line_number
 
-	def parse(line, variable_manager)
+	def parse(line, variable_manager, rom_variable, label_line_number)
 		@line = line
+		@rom_variable = rom_variable
+		@label_line_number = label_line_number
 		parse_a_instruction(variable_manager)
 	end
 
 	def parse_a_instruction(variable_manager)
-		strip_commercial_at_and_new_line
 		hack_line = ""
 
-		if register_address?
-			hack_line = "0" + convert_to_binary(self.line)
+		if numeric_register_address?
+			hack_line = "0" + convert_to_binary(line)
 		else
-			if !variable_manager.variables.key?(self.line.to_sym)
-				variable_manager.variables[self.line.to_sym] = variable_manager.variable_counter
-				variable_manager.variable_counter += 1
+
+			if !rom_variable && !variable_manager.ram_variables.key?(line.to_sym)
+				variable_manager.ram_variables[line.to_sym] = variable_manager.ram_variable_counter
+				variable_manager.ram_variable_counter += 1
+			elsif rom_variable
+				variable_manager.rom_variables[line.to_sym] = label_line_number
 			end
-			hack_line = "0" + convert_to_binary(variable_manager.variables[self.line.to_sym])
+
+			if rom_variable
+				hack_line = "0" + convert_to_binary(variable_manager.rom_variables[line.to_sym])
+			else
+				hack_line = "0" + convert_to_binary(variable_manager.ram_variables[line.to_sym])
+			end
 		end
 
 		hack_line
 	end
 
-	def strip_commercial_at_and_new_line
-		@line = line.gsub(/\@+/, "").gsub(/\n+/, "")
-	end
-
-	def register_address?
+	def numeric_register_address?
 		self.line.gsub(/\@+/, "")[/^[0-9]+$/] != nil
 	end
 
@@ -40,6 +46,7 @@ class AParser
 
 	def binary_string(decimal_num)
 		binary = (decimal_num % 2).to_s 
+		
 		if decimal_num == 0
 			return binary
 		elsif decimal_num == 1
@@ -47,6 +54,7 @@ class AParser
 		else 
 			return binary = binary_string(decimal_num / 2).to_s + binary
 		end
+
 		return binary.to_i
 	end
 

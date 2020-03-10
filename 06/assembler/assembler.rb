@@ -15,7 +15,7 @@ class Assembler
 
 	def translate_program
 		create_hack_file
-		parser = Parser.new(@hack_file_name)
+		parser = Parser.new(@hack_file_name, @asm_file_name)
 
 		File.open(asm_file_name).each do |line|
 			parser.parse(line, variable_manager)

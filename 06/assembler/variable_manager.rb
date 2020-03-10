@@ -1,9 +1,9 @@
 class VariableManager
 
-	attr_accessor :variables, :variable_counter, :program_line_counter
+	attr_accessor :ram_variables, :rom_variables, :ram_variable_counter, :program_line_counter
 
-  def initialize
-		@variables = {
+	def initialize
+		@ram_variables = {
 			:R0 => 0,
 			:R1 => 1,
 			:R2 => 2,
@@ -28,7 +28,8 @@ class VariableManager
 			:SCREEN => 16384,
 			:KBD => 24576
 		}
-		@variable_counter = 16
+		@rom_variables = {}
+		@ram_variable_counter = 16
 		@program_line_counter = 0
 	end
 
