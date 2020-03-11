@@ -10,7 +10,7 @@ class LabelParser
 	end
 
 	def parse_label(variable_manager)
-		variable_manager.rom_variables[label.to_sym] = variable_manager.program_line_counter.to_s
+		variable_manager.variables[label.to_sym] = variable_manager.program_line_counter.to_s
 	end
 
 	def label

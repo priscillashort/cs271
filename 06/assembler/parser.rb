@@ -5,39 +5,45 @@ require_relative 'variable_manager'
 
 class Parser
 
-	attr_reader :hack_file_name, :asm_file_name, :line
+	attr_reader :hack_file_name, :line
 
-  def initialize(hack_file_name, asm_file_name)
+  def initialize(hack_file_name)
 		@hack_file_name = hack_file_name
-		@asm_file_name = asm_file_name
+		@aparser = AParser.new
+		@cparser = CParser.new
+		@labelparser = LabelParser.new
 	end
 	
 	def parse(line, variable_manager)
 		@line = line
-		@line = strip_whitespace
-		@line = strip_comments
-		aparser = AParser.new
-		cparser = CParser.new
-		labelparser = LabelParser.new
+		strip_whitespace
+		strip_comments
 
 		if a_instruction?
 			strip_commercial_at_and_new_line
-			label_line_number = 0
-			rom_variable = label_exists_in_file?
-
-			if rom_variable
-				label_line_number = get_rom_line_number
-			end
-
-			parsed_line = aparser.parse(@line, variable_manager, rom_variable, label_line_number)
+			parsed_line = @aparser.parse(@line, variable_manager)
 			File.write(@hack_file_name, parsed_line << "\n", mode: "a")
-			variable_manager.program_line_counter += 1
 		elsif c_instruction?
-			parsed_line = cparser.parse(@line)
+			parsed_line = @cparser.parse(@line)
 			File.write(@hack_file_name, parsed_line << "\n", mode: "a")
+		elsif blank_line? || label?
+		else
+			raise "Line '#{line}' is not valid asm code"
+		end
+
+	end
+
+	def add_label_variables(line, variable_manager)
+		@line = line
+		strip_whitespace
+		strip_comments
+
+		if a_instruction? || c_instruction?
 			variable_manager.program_line_counter += 1
 		elsif label?
-			labelparser.parse(@line, variable_manager)
+			if !variable_manager.variables.key?(line.to_sym)
+				@labelparser.parse(@line, variable_manager)
+			end
 		elsif blank_line?
 		else
 			raise "Line '#{line}' is not valid asm code"
@@ -45,12 +51,12 @@ class Parser
 
 	end
 
-	def strip_whitespace(parse_line = line)
-		parse_line.gsub(/\s+/, "")
+	def strip_whitespace
+		@line = line.gsub(/\s+/, "")
 	end
 	
-	def strip_comments(parse_line = line)
-		parse_line.gsub(/\/\/.+/, "")
+	def strip_comments
+		@line = line.gsub(/\/\/.+/, "")
 	end
 
 	def strip_commercial_at_and_new_line
@@ -65,35 +71,12 @@ class Parser
 		self.line[/^\(/] == "(" && self.line[/\)$/] == ")"
 	end
 
-	def a_instruction?(parse_line = line)
-		parse_line[/^@/] == "@"
+	def a_instruction?
+		self.line[/^@/] == "@"
 	end
 
-	def c_instruction?(parse_line = line)
-		parse_line[/^M/] == "M" || parse_line[/^D/] == "D" || parse_line[/^A/] == "A" || parse_line[/^0/] == "0"
-	end
-
-	def label_exists_in_file?
-		File.read(asm_file_name).include?("(#{line})")
-	end
-
-	def get_rom_line_number
-		rom_line_number = 0
-
-		File.open(asm_file_name).each do |parse_line|
-			parse_line = strip_whitespace(parse_line)
-			parse_line = strip_comments(parse_line)
-
-			if a_instruction?(parse_line) || c_instruction?(parse_line)
-				rom_line_number += 1
-			end
-
-			if parse_line == "(#{line})"
-				break
-			end
-		end
-
-		rom_line_number
+	def c_instruction?
+		self.line[/^M/] == "M" || self.line[/^D/] == "D" || self.line[/^A/] == "A" || self.line[/^0/] == "0"
 	end
 
 end

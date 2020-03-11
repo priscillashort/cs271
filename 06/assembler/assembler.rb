@@ -9,13 +9,17 @@ class Assembler
 
 	def initialize(asm_file_name)
 		@asm_file_name = asm_file_name
-		@hack_file_name = to_hack_file_name(asm_file_name)
+		@hack_file_name = create_hack_file_name
 		@variable_manager = VariableManager.new
 	end
 
 	def translate_program
 		create_hack_file
-		parser = Parser.new(@hack_file_name, @asm_file_name)
+		parser = Parser.new(@hack_file_name)
+
+		File.open(asm_file_name).each do |line|
+			parser.add_label_variables(line, variable_manager)
+		end
 
 		File.open(asm_file_name).each do |line|
 			parser.parse(line, variable_manager)
@@ -23,7 +27,7 @@ class Assembler
 
 	end
 
-	def to_hack_file_name(asm_file_name)
+	def create_hack_file_name
 		if asm_file_name[/\.asm$/] != ".asm"
 			raise "This is not an .asm file"
 		end

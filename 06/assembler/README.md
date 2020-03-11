@@ -9,4 +9,3 @@
 ## Example command: ruby assembler.rb Add.asm
 ## If an .asm file is not used as the first arguement, the assembler will throw and error.
 ## When the assembler runs, a .hack file will be created in the same directory as the .asm file.
-## NOTE: the pong.asm file with no symbols takes a few minutes to run.
